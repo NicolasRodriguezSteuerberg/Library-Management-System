@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:17 # Imagen oficial de PostgreSQL, versión 15
+    container_name: library_postgres # Nombre del contenedor
+    ports:
+      - "5432:5432" # Expone el puerto de PostgreSQL
+    environment:
+      POSTGRES_USER: security # Usuario predeterminado
+      POSTGRES_PASSWORD: security # Contraseña del usuario
+      POSTGRES_DB: security # Base de datos predeterminada
