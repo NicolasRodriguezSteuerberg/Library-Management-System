@@ -4,6 +4,7 @@ import com.nsteuerberg.library.authentication.presentation.dto.requests.SignInRe
 import com.nsteuerberg.library.authentication.presentation.dto.requests.SignUpRequest;
 import com.nsteuerberg.library.authentication.presentation.dto.responses.RsaPublicKeyResponse;
 import com.nsteuerberg.library.authentication.presentation.dto.responses.TokenAuthenticationResponse;
+import com.nsteuerberg.library.authentication.service.exception.BadRegisterException;
 import com.nsteuerberg.library.authentication.service.implementation.AuthServiceImpl;
 import com.nsteuerberg.library.authentication.util.token.JwtProvider;
 import jakarta.validation.Valid;
@@ -44,6 +45,14 @@ public class AuthController {
             @RequestBody @Valid SignUpRequest signUpRequest,
             @RequestHeader(value = "User-Agent") String deviceId
     ) {
-        return null;
+        if (!signUpRequest.password().equals(signUpRequest.confirmPassword())){
+            throw new BadRegisterException("Passwords must match");
+        }
+        // ToDo only librarians can add new Members (change register to createUser)
+        // ToDo sendEmail to the new Member
+        // ToDo call to service that have all the content of the user
+        return authService.register(signUpRequest, deviceId);
     }
+
+    // ToDo create method to update passwords
 }

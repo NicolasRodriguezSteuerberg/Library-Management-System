@@ -1,13 +1,18 @@
 package com.nsteuerberg.library.authentication.service.implementation;
 
 import com.nsteuerberg.library.authentication.persistance.entity.RefreshTokenEntity;
+import com.nsteuerberg.library.authentication.persistance.entity.RoleEntity;
+import com.nsteuerberg.library.authentication.persistance.entity.UserEntity;
 import com.nsteuerberg.library.authentication.persistance.repository.IRefreshRepository;
+import com.nsteuerberg.library.authentication.persistance.repository.IRoleRepository;
 import com.nsteuerberg.library.authentication.persistance.repository.IUserRepository;
 import com.nsteuerberg.library.authentication.presentation.dto.requests.SignInRequest;
 import com.nsteuerberg.library.authentication.presentation.dto.requests.SignUpRequest;
 import com.nsteuerberg.library.authentication.presentation.dto.responses.TokenAuthenticationResponse;
+import com.nsteuerberg.library.authentication.service.exception.BadRegisterException;
 import com.nsteuerberg.library.authentication.service.interfaces.IAuthService;
 import com.nsteuerberg.library.authentication.service.security.CustomUserDetails;
+import com.nsteuerberg.library.authentication.util.constants.Roles;
 import com.nsteuerberg.library.authentication.util.date.ExpiredDate;
 import com.nsteuerberg.library.authentication.util.token.JwtProvider;
 import com.nsteuerberg.library.authentication.util.token.RefreshTokenProvider;
@@ -17,10 +22,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Service
 public class AuthServiceImpl implements IAuthService {
 
     private final IUserRepository userRepository;
+    private final IRoleRepository roleRepository;
     private final IRefreshRepository refreshRepository;
     private final UserDetailServiceImpl userDetailService;
     private final JwtProvider jwtProvider;
@@ -28,8 +37,9 @@ public class AuthServiceImpl implements IAuthService {
     private final ExpiredDate expiredDate;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(IUserRepository userRepository, IRefreshRepository refreshRepository, UserDetailServiceImpl userDetailService, JwtProvider jwtProvider, RefreshTokenProvider refreshProvider, ExpiredDate expiredDate, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, IRefreshRepository refreshRepository, UserDetailServiceImpl userDetailService, JwtProvider jwtProvider, RefreshTokenProvider refreshProvider, ExpiredDate expiredDate, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.refreshRepository = refreshRepository;
         this.userDetailService = userDetailService;
         this.jwtProvider = jwtProvider;
@@ -59,8 +69,39 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public TokenAuthenticationResponse register(SignUpRequest signUpRequest, String deviceId) {
 
-        // userRepository.save();
-        return null;
+        UserEntity newUser = createUserIfNoExist(signUpRequest.username(), signUpRequest.password(), Set.of(Roles.MEMBER));
+
+        // generate tokens
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                newUser.getUsername(),
+                newUser.getPassword(),
+                userDetailService.getAuthorities(newUser.getRoleEntitySet())
+        );
+
+        TokenAuthenticationResponse tokens = generateTokens(authentication);
+        saveOrUpdateToken(tokens, deviceId, newUser.getId());
+        return tokens;
+    }
+
+    private UserEntity createUserIfNoExist(String username, String password, Set<Roles> rolesSet) {
+        if (userRepository.findUserEntityByUsername(username).isPresent()){
+            throw new BadRegisterException("User already exist with the username: " + username);
+        }
+        // si no hay roles agregamos uno nuevo
+        if (rolesSet.isEmpty()) rolesSet.add(Roles.MEMBER);
+        Set<RoleEntity> roleEntities = new HashSet<>();
+        rolesSet.forEach(role ->
+                roleEntities.add(roleRepository.findRoleEntityByRole(role).orElseThrow(() ->
+                        new BadRegisterException(role.name() + " don't exists")
+                ))
+        );
+
+        UserEntity createUser = UserEntity.builder()
+                .username(username)
+                .password(passwordEncoder.encode(password))
+                .roleEntitySet(roleEntities)
+                .build();
+        return userRepository.save(createUser);
     }
 
     private TokenAuthenticationResponse generateTokens (Authentication authentication) {

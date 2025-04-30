@@ -12,14 +12,19 @@ import org.springframework.stereotype.Component;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
 
 @Component
 public class JwtProvider {
 
-    @Value("${jwt.with-user}")
+    @Value("${token.jwt.with-user}")
     private String userGenerator;
+
+    @Value("${token.jwt.expired-minutes}")
+    private Long expiredMinutes;
 
     @Autowired
     private final RSAPublicKey rsaPublicKey;
@@ -41,10 +46,15 @@ public class JwtProvider {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
         Algorithm algorithm = Algorithm.RSA256(rsaPublicKey, rsaPrivateKey);
+
+        Instant now = Instant.now();
+
         return JWT.create()
                 .withIssuer(userGenerator)
                 .withSubject(username)
                 .withClaim("authorities", authorities)
+                .withIssuedAt(now)
+                .withExpiresAt(now.plus(expiredMinutes, ChronoUnit.MINUTES))
                 .sign(algorithm);
     }
 

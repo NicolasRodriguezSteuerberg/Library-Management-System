@@ -1,6 +1,7 @@
 package com.nsteuerberg.library.authentication.presentation.advice;
 
-import com.nsteuerberg.library.authentication.presentation.dto.responses.ErrorExceptionResponse;
+import com.nsteuerberg.library.authentication.presentation.advice.responses.AuthExceptionResponse;
+import com.nsteuerberg.library.authentication.service.exception.BadRegisterException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,8 +14,8 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(UsernameNotFoundException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorExceptionResponse usernameNotFoundException(UsernameNotFoundException exception) {
-        return new ErrorExceptionResponse(
+    public AuthExceptionResponse usernameNotFoundException(UsernameNotFoundException exception) {
+        return new AuthExceptionResponse(
                 "Authentication",
                 exception.getMessage()
         );
@@ -22,9 +23,18 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorExceptionResponse badCredentialsException(BadCredentialsException exception) {
-        return new ErrorExceptionResponse(
+    public AuthExceptionResponse badCredentialsException(BadCredentialsException exception) {
+        return new AuthExceptionResponse(
                 "Authentication",
+                exception.getMessage()
+        );
+    }
+
+    @ExceptionHandler(BadRegisterException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public AuthExceptionResponse badRegisterException(BadRegisterException exception){
+        return new AuthExceptionResponse(
+                "Sign up",
                 exception.getMessage()
         );
     }

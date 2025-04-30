@@ -16,9 +16,9 @@ import java.util.Base64;
 @Configuration
 public class RsaKeyConfiguration {
 
-    @Value("${jwt.rsa.private-key}")
+    @Value("${token.jwt.rsa.private-key}")
     private Resource privateKeyResource;
-    @Value("${jwt.rsa.public-key}")
+    @Value("${token.jwt.rsa.public-key}")
     private Resource publicKeyResource;
 
     @Bean

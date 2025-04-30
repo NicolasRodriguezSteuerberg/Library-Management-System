@@ -13,7 +13,7 @@ import lombok.*;
 @Table(name = "permissions")
 public class PermissionEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column(nullable = false, unique = true)
     @Enumerated(value = EnumType.STRING)

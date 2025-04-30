@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
+import java.time.Instant;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,6 +23,6 @@ public class RefreshTokenEntity {
     // hash token
     private String token;
     @Indexed(expireAfter = "0s")
-    private Date expiredDate;
+    private Instant expiredDate;
 }
 
