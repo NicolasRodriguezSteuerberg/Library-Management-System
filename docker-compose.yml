@@ -8,3 +8,9 @@ services:
       POSTGRES_USER: security # Usuario predeterminado
       POSTGRES_PASSWORD: security # Contraseña del usuario
       POSTGRES_DB: security # Base de datos predeterminada
+
+  mongo:
+    image: mongo:latest
+    container_name: mongodb_container
+    ports:
+      - "27017:27017"

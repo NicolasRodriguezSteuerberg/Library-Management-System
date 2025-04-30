@@ -3,24 +3,25 @@ package com.nsteuerberg.library.authentication.presentation.controller;
 import com.nsteuerberg.library.authentication.presentation.dto.requests.SignInRequest;
 import com.nsteuerberg.library.authentication.presentation.dto.requests.SignUpRequest;
 import com.nsteuerberg.library.authentication.presentation.dto.responses.RsaPublicKeyResponse;
-import com.nsteuerberg.library.authentication.presentation.dto.responses.SignInResponse;
-import com.nsteuerberg.library.authentication.presentation.dto.responses.SignUpResponse;
-import com.nsteuerberg.library.authentication.util.jwt.JwtProvider;
+import com.nsteuerberg.library.authentication.presentation.dto.responses.TokenAuthenticationResponse;
+import com.nsteuerberg.library.authentication.service.implementation.AuthServiceImpl;
+import com.nsteuerberg.library.authentication.util.token.JwtProvider;
 import jakarta.validation.Valid;
-import org.apache.logging.log4j.util.InternalException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.interfaces.RSAKey;
-import java.security.interfaces.RSAPublicKey;
 
 @RestController
 @RequestMapping("auth")
 public class AuthController {
 
-    @Autowired
-    private JwtProvider provider;
+    private final JwtProvider provider;
+    private final AuthServiceImpl authService;
+
+    public AuthController(JwtProvider provider, AuthServiceImpl authService) {
+        this.provider = provider;
+        this.authService = authService;
+    }
+
 
     @GetMapping("public-key")
     @ResponseStatus(HttpStatus.OK)
@@ -30,17 +31,19 @@ public class AuthController {
 
     @PostMapping("sign-in")
     @ResponseStatus(HttpStatus.OK)
-    public SignInResponse login(@RequestBody @Valid SignInRequest signInRequest){
-        System.out.println(provider.createToken());
-        return SignInResponse.builder()
-                .accessToken(signInRequest.username())
-                .refreshToken(signInRequest.password())
-                .build();
+    public TokenAuthenticationResponse login(
+            @RequestBody @Valid SignInRequest signInRequest,
+            @RequestHeader(value = "User-Agent") String deviceId
+    ){
+        return authService.login(signInRequest, deviceId);
     }
 
     @PostMapping("sign-up")
     @ResponseStatus(HttpStatus.OK)
-    public SignUpResponse register(@RequestBody @Valid SignUpRequest signUpRequest) {
+    public TokenAuthenticationResponse register(
+            @RequestBody @Valid SignUpRequest signUpRequest,
+            @RequestHeader(value = "User-Agent") String deviceId
+    ) {
         return null;
     }
 }
