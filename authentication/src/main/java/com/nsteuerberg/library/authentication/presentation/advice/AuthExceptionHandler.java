@@ -3,6 +3,7 @@ package com.nsteuerberg.library.authentication.presentation.advice;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.nsteuerberg.library.authentication.presentation.advice.responses.AuthExceptionResponse;
 import com.nsteuerberg.library.authentication.service.exception.BadRegisterException;
+import com.nsteuerberg.library.authentication.service.exception.RefreshTokenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -45,6 +46,15 @@ public class AuthExceptionHandler {
     public AuthExceptionResponse jwtVerificationException(JWTVerificationException e){
         return new AuthExceptionResponse(
                 "JWT Token",
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler(RefreshTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public AuthExceptionResponse refreshTokenException(RefreshTokenException e) {
+        return new AuthExceptionResponse(
+                "Refresh Token",
                 e.getMessage()
         );
     }

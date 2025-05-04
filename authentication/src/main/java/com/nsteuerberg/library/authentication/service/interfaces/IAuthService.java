@@ -8,4 +8,6 @@ public interface IAuthService {
     TokenAuthenticationResponse login(SignInRequest signInRequest, String deviceId);
 
     TokenAuthenticationResponse register(SignUpRequest signUpRequest, String deviceId);
+
+    TokenAuthenticationResponse refreshTokens(String refreshToken, String deviceId);
 }

@@ -1,5 +1,6 @@
 package com.nsteuerberg.library.authentication.presentation.controller;
 
+import com.nsteuerberg.library.authentication.presentation.dto.requests.RefreshTokenRequest;
 import com.nsteuerberg.library.authentication.presentation.dto.requests.SignInRequest;
 import com.nsteuerberg.library.authentication.presentation.dto.requests.SignUpRequest;
 import com.nsteuerberg.library.authentication.presentation.dto.responses.RsaPublicKeyResponse;
@@ -8,6 +9,7 @@ import com.nsteuerberg.library.authentication.service.exception.BadRegisterExcep
 import com.nsteuerberg.library.authentication.service.implementation.AuthServiceImpl;
 import com.nsteuerberg.library.authentication.util.token.JwtProvider;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +24,6 @@ public class AuthController {
         this.provider = provider;
         this.authService = authService;
     }
-
 
     @GetMapping("public-key")
     @ResponseStatus(HttpStatus.OK)
@@ -52,6 +53,15 @@ public class AuthController {
         // ToDo sendEmail to the new Member
         // ToDo call to service that have all the content of the user
         return authService.register(signUpRequest, deviceId);
+    }
+    
+    @PatchMapping("refresh-token")
+    @ResponseStatus(HttpStatus.OK)
+    public TokenAuthenticationResponse refreshTokens(
+            @RequestBody RefreshTokenRequest refreshToken,
+            @RequestHeader(value = HttpHeaders.USER_AGENT) String deviceId
+    ) {
+        return authService.refreshTokens(refreshToken.refreshToken(), deviceId);
     }
 
     // ToDo create method to update passwords

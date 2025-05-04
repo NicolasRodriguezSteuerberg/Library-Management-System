@@ -10,6 +10,7 @@ import com.nsteuerberg.library.authentication.presentation.dto.requests.SignInRe
 import com.nsteuerberg.library.authentication.presentation.dto.requests.SignUpRequest;
 import com.nsteuerberg.library.authentication.presentation.dto.responses.TokenAuthenticationResponse;
 import com.nsteuerberg.library.authentication.service.exception.BadRegisterException;
+import com.nsteuerberg.library.authentication.service.exception.RefreshTokenException;
 import com.nsteuerberg.library.authentication.service.interfaces.IAuthService;
 import com.nsteuerberg.library.authentication.service.security.CustomUserDetails;
 import com.nsteuerberg.library.authentication.util.constants.Roles;
@@ -83,6 +84,25 @@ public class AuthServiceImpl implements IAuthService {
         return tokens;
     }
 
+    @Override
+    public TokenAuthenticationResponse refreshTokens(String refreshToken, String deviceId) {
+        RefreshTokenEntity refreshTokenEntity = refreshRepository.findByTokenAndDeviceId(
+                refreshProvider.hashToken(refreshToken),
+                deviceId
+        )
+                .orElseThrow(() -> new RefreshTokenException("Refresh token doesn't existe or else is revoked"));
+        UserEntity userEntity = userRepository.findById(refreshTokenEntity.getUserId()).orElseThrow(() -> new BadCredentialsException("User doesn't exist, probably is deleted"));
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userEntity.getUsername(),
+                userEntity.getPassword(),
+                userDetailService.getAuthorities(userEntity.getRoleEntitySet())
+        );
+
+        TokenAuthenticationResponse tokens = generateTokens(authentication);
+        saveOrUpdateToken(tokens, deviceId, userEntity.getId());
+        return tokens;
+    }
+
     private UserEntity createUserIfNoExist(String username, String password, Set<Roles> rolesSet) {
         if (userRepository.findUserEntityByUsername(username).isPresent()){
             throw new BadRegisterException("User already exist with the username: " + username);
@@ -113,7 +133,7 @@ public class AuthServiceImpl implements IAuthService {
     private void saveOrUpdateToken(TokenAuthenticationResponse tokens, String deviceId, Long userId) {
         refreshRepository.findByUserIdAndDeviceId(userId, deviceId).ifPresentOrElse(
                 token -> {
-                    token.setToken(tokens.refreshToken());
+                    token.setToken(refreshProvider.hashToken(tokens.refreshToken()));
                     token.setExpiredDate(expiredDate.getExpiredDate());
                     refreshRepository.save(token);
                 },
@@ -121,7 +141,7 @@ public class AuthServiceImpl implements IAuthService {
                     RefreshTokenEntity refreshEntity = RefreshTokenEntity.builder()
                             .deviceId(deviceId)
                             .userId(userId)
-                            .token(tokens.refreshToken())
+                            .token(refreshProvider.hashToken(tokens.refreshToken()))
                             .expiredDate(expiredDate.getExpiredDate())
                             .build();
                     refreshRepository.save(refreshEntity);

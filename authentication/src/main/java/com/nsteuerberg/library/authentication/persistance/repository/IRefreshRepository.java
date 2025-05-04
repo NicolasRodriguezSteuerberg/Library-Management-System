@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface IRefreshRepository extends MongoRepository<RefreshTokenEntity, String> {
     Optional<RefreshTokenEntity> findByUserIdAndDeviceId(Long userId, String deviceId);
 
+    Optional<RefreshTokenEntity> findByTokenAndDeviceId(String token, String deviceId);
+
 }
