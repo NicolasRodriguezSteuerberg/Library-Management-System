@@ -58,9 +58,9 @@ public class JwtProvider {
                 .sign(algorithm);
     }
 
-    private RsaPublicKeyResponse getPublicKey(RSAPublicKey publicKet) {
-        String modulus = Base64.getUrlEncoder().withoutPadding().encodeToString(publicKet.getModulus().toByteArray());
-        String exponent = Base64.getUrlEncoder().withoutPadding().encodeToString(publicKet.getPublicExponent().toByteArray());
+    private RsaPublicKeyResponse getPublicKey(RSAPublicKey publicKey) {
+        String modulus = Base64.getUrlEncoder().withoutPadding().encodeToString(publicKey.getModulus().toByteArray());
+        String exponent = Base64.getUrlEncoder().withoutPadding().encodeToString(publicKey.getPublicExponent().toByteArray());
         return new RsaPublicKeyResponse("RSA", modulus, exponent);
     }
 }

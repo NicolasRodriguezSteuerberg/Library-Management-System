@@ -21,6 +21,7 @@ public class UserEntity {
     private String username;
     @Column(nullable = false)
     private String password;
+    //private boolean isEnabled;
     @ManyToMany(
             cascade = CascadeType.ALL,
             fetch = FetchType.EAGER

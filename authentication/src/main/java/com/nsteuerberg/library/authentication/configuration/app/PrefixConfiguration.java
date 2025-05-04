@@ -1,4 +1,4 @@
-package com.nsteuerberg.library.authentication.configuration;
+package com.nsteuerberg.library.authentication.configuration.app;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;

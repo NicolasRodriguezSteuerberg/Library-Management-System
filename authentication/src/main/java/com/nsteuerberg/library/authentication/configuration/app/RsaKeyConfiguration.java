@@ -1,4 +1,4 @@
-package com.nsteuerberg.library.authentication.configuration;
+package com.nsteuerberg.library.authentication.configuration.app;
 
 
 import org.springframework.beans.factory.annotation.Value;

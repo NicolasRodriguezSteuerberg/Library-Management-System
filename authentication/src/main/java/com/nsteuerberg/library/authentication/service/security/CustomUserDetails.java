@@ -11,12 +11,16 @@ public class CustomUserDetails implements UserDetails {
     private Long id;
     private String username;
     private String password;
+    //private boolean isEnabled;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUserDetails(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(Long id, String username, String password,
+                             //boolean isEnabled,
+                             Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.password = password;
+        //this.isEnabled = isEnabled;
         this.authorities = authorities;
     }
 
@@ -34,4 +38,10 @@ public class CustomUserDetails implements UserDetails {
     public String getUsername() {
         return username;
     }
+    /*
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+     */
 }

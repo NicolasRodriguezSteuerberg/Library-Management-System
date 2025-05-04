@@ -22,6 +22,7 @@
         <module>eureka</module>
         <module>gateway</module>
         <module>authentication</module>
+        <module>books</module>
     </modules>
 
     <properties>
@@ -29,6 +30,14 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>4.5.0</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>

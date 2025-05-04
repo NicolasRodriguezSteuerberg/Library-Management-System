@@ -1,5 +1,6 @@
 package com.nsteuerberg.library.authentication.presentation.advice;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.nsteuerberg.library.authentication.presentation.advice.responses.AuthExceptionResponse;
 import com.nsteuerberg.library.authentication.service.exception.BadRegisterException;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,15 @@ public class AuthExceptionHandler {
         return new AuthExceptionResponse(
                 "Sign up",
                 exception.getMessage()
+        );
+    }
+
+    @ExceptionHandler(JWTVerificationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public AuthExceptionResponse jwtVerificationException(JWTVerificationException e){
+        return new AuthExceptionResponse(
+                "JWT Token",
+                e.getMessage()
         );
     }
 

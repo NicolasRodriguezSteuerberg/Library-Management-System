@@ -34,6 +34,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
                 userEntity.getId(),
                 username,
                 userEntity.getPassword(),
+                //userEntity.isEnabled(),
                 authorities
         );
     }
